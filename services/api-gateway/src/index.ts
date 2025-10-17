@@ -20,8 +20,6 @@ await server.register(cors, {
       'http://localhost:3001',
       'https://vibep.com.br',
       'https://www.vibep.com.br',
-      'https://app.vibep.com.br',
-      'https://dashboard.vibep.com.br',
     ]
 
     // Aceitar todas as URLs do projeto Vercel (qualquer deploy)
