@@ -1,0 +1,14 @@
+{
+  "workspaces": [
+    "services/api-gateway",
+    "services/auth-service",
+    "services/payment-service",
+    "services/webhook-service"
+  ],
+  "scripts": {
+    "dev:gateway": "npm run dev --workspace=@vibe-pay/api-gateway",
+    "dev:auth": "npm run dev --workspace=@vibe-pay/auth-service",
+    "dev:payment": "npm run dev --workspace=@vibe-pay/payment-service",
+    "dev:webhook": "npm run dev --workspace=@vibe-pay/webhook-service"
+  }
+}
