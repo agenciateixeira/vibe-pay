@@ -1,8 +1,0 @@
-node_modules
-.next
-.env.local
-.git
-*.log
-.DS_Store
-coverage
-.vscode
