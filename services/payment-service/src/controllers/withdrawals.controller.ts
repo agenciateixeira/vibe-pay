@@ -51,19 +51,46 @@ export async function createWithdrawal(
     }
 
     if (!userData.can_withdraw) {
-      return reply.code(403).send({ 
+      return reply.code(403).send({
         error: 'Withdrawal not allowed',
         message: 'Você precisa completar a verificação de documentos e ativar 2FA antes de sacar'
       })
     }
 
+    // Validar valor mínimo de saque
+    const MIN_WITHDRAWAL = 5.00
+    if (withdrawalData.amount < MIN_WITHDRAWAL) {
+      return reply.code(400).send({
+        error: 'Amount below minimum',
+        message: `O valor mínimo para saque é R$ ${MIN_WITHDRAWAL.toFixed(2)}`,
+        minimum_amount: MIN_WITHDRAWAL
+      })
+    }
+
+    // Calcular taxa de saque
+    const WITHDRAWAL_FEE = 1.20 // R$ 1,00 OpenPix + R$ 0,20 Vibe Pay
+    const FEE_EXEMPTION_THRESHOLD = 500.00
+
+    const withdrawalFee = withdrawalData.amount >= FEE_EXEMPTION_THRESHOLD ? 0 : WITHDRAWAL_FEE
+    const totalToDeduct = withdrawalData.amount + withdrawalFee
+    const netAmount = withdrawalData.amount // O que o usuário vai receber
+
+    console.log('💰 Cálculo do saque:')
+    console.log('  Valor solicitado:', withdrawalData.amount)
+    console.log('  Taxa:', withdrawalFee)
+    console.log('  Total a deduzir do saldo:', totalToDeduct)
+    console.log('  Valor líquido (usuário recebe):', netAmount)
+
     const currentBalance = parseFloat(userData.balance?.toString() || '0')
-    
-    if (currentBalance < withdrawalData.amount) {
-      return reply.code(400).send({ 
+
+    if (currentBalance < totalToDeduct) {
+      return reply.code(400).send({
         error: 'Insufficient balance',
+        message: `Saldo insuficiente. Você precisa de R$ ${totalToDeduct.toFixed(2)} (R$ ${withdrawalData.amount.toFixed(2)} + R$ ${withdrawalFee.toFixed(2)} taxa)`,
         current_balance: currentBalance,
-        requested_amount: withdrawalData.amount
+        requested_amount: withdrawalData.amount,
+        fee: withdrawalFee,
+        total_required: totalToDeduct
       })
     }
 
@@ -93,7 +120,7 @@ export async function createWithdrawal(
       .from('withdrawals')
       .insert({
         user_id: userData.id,
-        amount: withdrawalData.amount,
+        amount: netAmount, // Valor que vai para o usuário
         pix_key: pixKey,
         pix_key_type: pixKeyType,
         user_cpf_cnpj: userData.cpf_cnpj,
@@ -107,27 +134,40 @@ export async function createWithdrawal(
       return reply.code(500).send({ error: 'Failed to create withdrawal' })
     }
 
+    // Deduzir o valor total (valor + taxa) do saldo
     const { error: updateError } = await supabase
       .from('users')
-      .update({ balance: currentBalance - withdrawalData.amount })
+      .update({
+        balance: currentBalance - totalToDeduct,
+        total_withdrawn: supabase.raw(`total_withdrawn + ${netAmount}`)
+      })
       .eq('id', userData.id)
 
     if (updateError) {
       console.error('❌ Erro ao atualizar saldo:', updateError)
+      // Reverter a criação do saque se falhar
+      await supabase.from('withdrawals').delete().eq('id', withdrawal.id)
+      return reply.code(500).send({ error: 'Failed to update balance' })
     }
 
     console.log('✅ Saque solicitado:', withdrawal.id)
+    console.log('   Novo saldo:', currentBalance - totalToDeduct)
 
     return reply.send({
       success: true,
       withdrawal: {
         id: withdrawal.id,
         amount: withdrawal.amount,
+        fee: withdrawalFee,
+        total_deducted: totalToDeduct,
         pix_key: maskPixKey(withdrawal.pix_key, withdrawal.pix_key_type),
         pix_key_type: withdrawal.pix_key_type,
         status: withdrawal.status,
         requested_at: withdrawal.requested_at
-      }
+      },
+      message: withdrawalFee > 0
+        ? `Saque de R$ ${netAmount.toFixed(2)} solicitado. Taxa: R$ ${withdrawalFee.toFixed(2)}. Total debitado: R$ ${totalToDeduct.toFixed(2)}`
+        : `Saque de R$ ${netAmount.toFixed(2)} solicitado sem taxa (acima de R$ 500)`
     })
   } catch (error: any) {
     console.error('❌ Erro ao criar saque:', error)
@@ -285,8 +325,15 @@ export async function cancelWithdrawal(
       return reply.code(500).send({ error: 'Failed to cancel withdrawal' })
     }
 
+    // Calcular taxa original
+    const withdrawalAmount = parseFloat(withdrawal.amount)
+    const WITHDRAWAL_FEE = 1.20
+    const FEE_EXEMPTION_THRESHOLD = 500.00
+    const originalFee = withdrawalAmount >= FEE_EXEMPTION_THRESHOLD ? 0 : WITHDRAWAL_FEE
+    const totalToReturn = withdrawalAmount + originalFee
+
     const currentBalance = parseFloat(userData.balance || '0')
-    const newBalance = currentBalance + parseFloat(withdrawal.amount)
+    const newBalance = currentBalance + totalToReturn
 
     await supabase
       .from('users')
@@ -294,10 +341,12 @@ export async function cancelWithdrawal(
       .eq('id', userData.id)
 
     console.log('✅ Saque cancelado:', withdrawalId)
+    console.log('   Valor devolvido (incluindo taxa):', totalToReturn)
 
     return reply.send({
       success: true,
-      message: 'Withdrawal cancelled successfully'
+      message: 'Saque cancelado. Valor devolvido ao saldo.',
+      amount_returned: totalToReturn
     })
   } catch (error: any) {
     console.error('❌ Erro ao cancelar saque:', error)

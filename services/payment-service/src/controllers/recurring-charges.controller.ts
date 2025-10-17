@@ -355,9 +355,114 @@ export async function getPublicRecurringCharge(
   }
 }
 
+export async function generatePixForCharge(
+  request: FastifyRequest<{
+    Params: { chargeId: string }
+    Body: {
+      customer: {
+        name: string
+        email: string
+        phone: string
+        taxID: string
+      }
+    }
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const supabase = getSupabaseClient()
+    let { chargeId } = request.params
+    const { customer } = request.body
+
+    // Remover prefixo charge_ se existir
+    const actualId = chargeId.startsWith('charge_') ? chargeId.replace('charge_', '') : chargeId
+
+    console.log('💳 Gerando PIX para cobrança recorrente:', actualId)
+
+    // Buscar cobrança
+    const { data: charge, error: chargeError } = await supabase
+      .from('recurring_charges')
+      .select('*')
+      .eq('id', actualId)
+      .single()
+
+    if (chargeError || !charge) {
+      return reply.code(404).send({ error: 'Charge not found' })
+    }
+
+    // Criar cobrança via OpenPix
+    const openPixResponse = await fetch(`${process.env.OPENPIX_API_URL}/api/v1/charge`, {
+      method: 'POST',
+      headers: {
+        'Authorization': process.env.OPENPIX_API_KEY!,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        correlationID: `charge_${chargeId}_${Date.now()}`,
+        value: Math.round(charge.amount * 100),
+        comment: charge.description,
+        customer: {
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          taxID: customer.taxID.replace(/\D/g, '')
+        }
+      })
+    })
+
+    const openPixData = await openPixResponse.json()
+
+    if (!openPixResponse.ok) {
+      console.error('❌ Erro OpenPix:', openPixData)
+      return reply.code(500).send({ error: 'Failed to generate PIX' })
+    }
+
+    const pixCharge = openPixData.charge
+
+    console.log('✅ PIX gerado:', pixCharge.correlationID)
+
+    // Salvar pagamento na tabela payments para rastreamento do webhook
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        user_id: charge.user_id,
+        correlation_id: pixCharge.correlationID,
+        txid: pixCharge.correlationID,
+        amount: charge.amount,
+        description: charge.description,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        customer_tax_id: customer.taxID,
+        pix_key: pixCharge.brCode,
+        qr_code_url: pixCharge.qrCodeImage,
+        status: 'ACTIVE',
+        expires_at: pixCharge.expiresDate
+      })
+
+    if (paymentError) {
+      console.error('⚠️ Erro ao salvar payment (não crítico):', paymentError)
+    }
+
+    return reply.send({
+      success: true,
+      charge: {
+        correlationID: pixCharge.correlationID,
+        brCode: pixCharge.brCode,
+        qrCodeImage: pixCharge.qrCodeImage,
+        expiresDate: pixCharge.expiresDate,
+        value: charge.amount
+      }
+    })
+  } catch (error: any) {
+    console.error('❌ Erro ao gerar PIX:', error)
+    return reply.code(500).send({ error: error.message })
+  }
+}
+
 function calculateNextChargeDate(frequency: string): string {
   const now = new Date()
-  
+
   switch (frequency) {
     case 'weekly':
       now.setDate(now.getDate() + 7)
@@ -372,6 +477,6 @@ function calculateNextChargeDate(frequency: string): string {
       now.setFullYear(now.getFullYear() + 1)
       break
   }
-  
+
   return now.toISOString()
 }

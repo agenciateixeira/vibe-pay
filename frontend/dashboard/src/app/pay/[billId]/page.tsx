@@ -196,27 +196,69 @@ export default function CheckoutPage() {
             }
           }),
         })
-        
+
         const data = await response.json()
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Failed to generate PIX')
         }
-        
-        setPixData(data.pix)
+
+        // Backend retorna data.charge, não data.pix
+        const pixInfo = {
+          qr_code: data.charge.brCode,
+          qr_code_image: data.charge.qrCodeImage,
+          amount: data.charge.value,
+          expires_in_hours: 24
+        }
+        setPixData(pixInfo)
+
+        // Atualizar o link com a data de expiração
+        if (link) {
+          setLink({
+            ...link,
+            expires_at: data.charge.expiresDate
+          })
+        }
       } else {
         // Gerar PIX para payment link normal
-        const response = await api.generatePix(billId, {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone.replace(/\D/g, ''),
-          taxID: formData.taxID.replace(/\D/g, '')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/payment-links/${billId}/generate-pix`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customer: {
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone.replace(/\D/g, ''),
+              taxID: formData.taxID.replace(/\D/g, '')
+            }
+          }),
         })
-        
-        setPixData(response.pix)
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate PIX')
+        }
+
+        // Backend retorna data.charge, não data.pix
+        const pixInfo = {
+          qr_code: data.charge.brCode,
+          qr_code_image: data.charge.qrCodeImage,
+          amount: data.charge.value,
+          expires_in_hours: 24
+        }
+        setPixData(pixInfo)
+
+        // Atualizar o link com a data de expiração
+        if (link) {
+          setLink({
+            ...link,
+            expires_at: data.charge.expiresDate
+          })
+        }
       }
-      
-      await loadLink()
     } catch (error: any) {
       setError(error.message || 'Erro ao gerar PIX')
     } finally {

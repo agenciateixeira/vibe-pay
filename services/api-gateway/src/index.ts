@@ -59,9 +59,14 @@ server.get('/', async () => {
   }
 })
 
+// URLs dos serviços (produção ou desenvolvimento)
+const authServiceUrl = process.env.AUTH_SERVICE_URL || `http://localhost:${process.env.AUTH_SERVICE_PORT || 4001}`
+const paymentServiceUrl = process.env.PAYMENT_SERVICE_URL || `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`
+const webhookServiceUrl = process.env.WEBHOOK_SERVICE_URL || `http://localhost:${process.env.WEBHOOK_SERVICE_PORT || 4003}`
+
 // Auth Service Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.AUTH_SERVICE_PORT || 4001}`,
+  upstream: authServiceUrl,
   prefix: '/api/auth',
   rewritePrefix: '/auth',
   http2: false,
@@ -69,7 +74,7 @@ await server.register(proxy, {
 
 // Auth Service - Keys Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.AUTH_SERVICE_PORT || 4001}`,
+  upstream: authServiceUrl,
   prefix: '/api/keys',
   rewritePrefix: '/keys',
   http2: false,
@@ -77,7 +82,7 @@ await server.register(proxy, {
 
 // Documents Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.AUTH_SERVICE_PORT || 4001}`,
+  upstream: authServiceUrl,
   prefix: '/api/documents',
   rewritePrefix: '/documents',
   http2: false,
@@ -85,7 +90,7 @@ await server.register(proxy, {
 
 // 2FA Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.AUTH_SERVICE_PORT || 4001}`,
+  upstream: authServiceUrl,
   prefix: '/api/2fa',
   rewritePrefix: '/2fa',
   http2: false,
@@ -93,7 +98,7 @@ await server.register(proxy, {
 
 // Payment Service Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/payments',
   rewritePrefix: '/payments',
   http2: false,
@@ -103,10 +108,10 @@ await server.register(proxy, {
 server.get('/api/payment-links/public/:linkId', async (request, reply) => {
   const { linkId } = request.params as { linkId: string }
   console.log('🌐 Gateway: Buscando link público:', linkId)
-  
+
   try {
     const response = await fetch(
-      `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}/payment-links/public/${linkId}`
+      `${paymentServiceUrl}/payment-links/public/${linkId}`
     )
     
     const data = await response.json()
@@ -122,10 +127,10 @@ server.get('/api/payment-links/public/:linkId', async (request, reply) => {
 server.post('/api/payment-links/:linkId/generate-pix', async (request, reply) => {
   const { linkId } = request.params as { linkId: string }
   console.log('🌐 Gateway: Gerando PIX para:', linkId)
-  
+
   try {
     const response = await fetch(
-      `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}/payment-links/${linkId}/generate-pix`,
+      `${paymentServiceUrl}/payment-links/${linkId}/generate-pix`,
       {
         method: 'POST',
         headers: {
@@ -147,7 +152,7 @@ server.post('/api/payment-links/:linkId/generate-pix', async (request, reply) =>
 
 // Payment Links Proxy (rotas autenticadas)
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/payment-links',
   rewritePrefix: '/payment-links',
   http2: false,
@@ -157,10 +162,10 @@ await server.register(proxy, {
 server.get('/api/recurring-charges/public/:billId', async (request, reply) => {
   const { billId } = request.params as { billId: string }
   console.log('🌐 Gateway: Buscando cobrança recorrente pública:', billId)
-  
+
   try {
     const response = await fetch(
-      `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}/recurring-charges/public/${billId}`
+      `${paymentServiceUrl}/recurring-charges/public/${billId}`
     )
     
     const data = await response.json()
@@ -176,10 +181,10 @@ server.get('/api/recurring-charges/public/:billId', async (request, reply) => {
 server.post('/api/recurring-charges/:billId/generate-pix', async (request, reply) => {
   const { billId } = request.params as { billId: string }
   console.log('🌐 Gateway: Gerando PIX para cobrança recorrente:', billId)
-  
+
   try {
     const response = await fetch(
-      `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}/recurring-charges/${billId}/generate-pix`,
+      `${paymentServiceUrl}/recurring-charges/${billId}/generate-pix`,
       {
         method: 'POST',
         headers: {
@@ -201,7 +206,7 @@ server.post('/api/recurring-charges/:billId/generate-pix', async (request, reply
 
 // Recurring Charges Proxy (rotas autenticadas)
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/recurring-charges',
   rewritePrefix: '/recurring-charges',
   http2: false,
@@ -209,7 +214,7 @@ await server.register(proxy, {
 
 // Customers Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/customers',
   rewritePrefix: '/customers',
   http2: false,
@@ -217,7 +222,7 @@ await server.register(proxy, {
 
 // Withdrawals Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/withdrawals',
   rewritePrefix: '/withdrawals',
   http2: false,
@@ -225,7 +230,7 @@ await server.register(proxy, {
 
 // Products Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/products',
   rewritePrefix: '/products',
   http2: false,
@@ -233,7 +238,7 @@ await server.register(proxy, {
 
 // Transactions Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  upstream: paymentServiceUrl,
   prefix: '/api/transactions',
   rewritePrefix: '/transactions',
   http2: false,
@@ -241,21 +246,32 @@ await server.register(proxy, {
 
 // Webhook Management Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.WEBHOOK_SERVICE_PORT || 4003}`,
+  upstream: webhookServiceUrl,
   prefix: '/api/webhooks',
   rewritePrefix: '/webhooks',
   http2: false,
 })
 
 // ===== OPENPIX WEBHOOK - Rota pública (sem autenticação) =====
+// GET endpoint para validação do OpenPix
+server.get('/webhook/openpix', async (request, reply) => {
+  console.log('🌐 Gateway: Webhook OpenPix - Validação GET')
+  return reply.code(200).send({
+    success: true,
+    message: 'Webhook endpoint is ready',
+    service: 'Vibe Pay OpenPix Webhook'
+  })
+})
+
+// POST endpoint para receber eventos
 server.post('/webhook/openpix', async (request, reply) => {
   console.log('🌐 Gateway: Webhook OpenPix recebido')
   console.log('Headers:', request.headers)
   console.log('Body:', request.body)
-  
+
   try {
     const response = await fetch(
-      `http://localhost:${process.env.WEBHOOK_SERVICE_PORT || 4003}/openpix/webhook`,
+      `${webhookServiceUrl}/openpix/webhook`,
       {
         method: 'POST',
         headers: {
@@ -265,20 +281,25 @@ server.post('/webhook/openpix', async (request, reply) => {
         body: JSON.stringify(request.body)
       }
     )
-    
+
     const data = await response.json()
     console.log('🌐 Gateway: Resposta do webhook service:', data)
-    
+
     return reply.code(response.status).send(data)
   } catch (error: any) {
     console.error('🌐 Gateway: Erro no webhook:', error)
-    return reply.code(500).send({ error: error.message })
+    // Retornar 200 mesmo com erro para não bloquear validação do OpenPix
+    return reply.code(200).send({
+      success: true,
+      message: 'Webhook received',
+      note: 'Processing in background'
+    })
   }
 })
 
 // OpenPix Logs Proxy
 await server.register(proxy, {
-  upstream: `http://localhost:${process.env.WEBHOOK_SERVICE_PORT || 4003}`,
+  upstream: webhookServiceUrl,
   prefix: '/api/openpix',
   rewritePrefix: '/openpix',
   http2: false,

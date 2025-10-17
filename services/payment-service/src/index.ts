@@ -15,14 +15,16 @@ import {
   createPaymentLink,
   getPaymentLinks,
   deletePaymentLink,
-  getPublicPaymentLink
+  getPublicPaymentLink,
+  generatePixForLink
 } from './controllers/payment-links.controller.js'
 import {
   createRecurringCharge,
   getRecurringCharges,
   updateRecurringChargeStatus,
   getPublicRecurringCharge,
-  getChargeHistory
+  getChargeHistory,
+  generatePixForCharge
 } from './controllers/recurring-charges.controller.js'
 import {
   getCustomers,
@@ -65,6 +67,7 @@ server.post('/payment-links/create', createPaymentLink)
 server.get('/payment-links', getPaymentLinks)
 server.delete('/payment-links/:linkId', deletePaymentLink)
 server.get('/payment-links/public/:linkId', getPublicPaymentLink)
+server.post('/payment-links/:linkId/generate-pix', generatePixForLink)
 
 // ===== RECURRING CHARGES =====
 server.post('/recurring-charges/create', createRecurringCharge)
@@ -72,6 +75,7 @@ server.get('/recurring-charges', getRecurringCharges)
 server.get('/recurring-charges/public/:billId', getPublicRecurringCharge)
 server.get('/recurring-charges/:chargeId/history', getChargeHistory)
 server.put('/recurring-charges/:chargeId/status', updateRecurringChargeStatus)
+server.post('/recurring-charges/:chargeId/generate-pix', generatePixForCharge)
 
 // ===== CUSTOMERS =====
 server.get('/customers', getCustomers)

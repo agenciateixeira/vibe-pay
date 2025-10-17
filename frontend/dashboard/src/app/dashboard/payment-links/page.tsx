@@ -31,14 +31,25 @@ interface PaymentLinkCreated {
   expires_at: string
 }
 
+interface Product {
+  id: string
+  name: string
+  description: string
+  amount: number
+  frequency: string
+  active: boolean
+}
+
 export default function PaymentLinksPage() {
   const toast = useToastContext()
   const [links, setLinks] = useState<PaymentLink[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [linkCreated, setLinkCreated] = useState<PaymentLinkCreated | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<string>('')
   const [formData, setFormData] = useState({
     amount: '',
     product_name: '',
@@ -58,6 +69,7 @@ export default function PaymentLinksPage() {
 
   useEffect(() => {
     loadLinks()
+    loadProducts()
   }, [])
 
   const loadLinks = async () => {
@@ -68,6 +80,41 @@ export default function PaymentLinksPage() {
       console.error('Erro ao carregar links:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadProducts = async () => {
+    try {
+      const response = await api.getProducts()
+      setProducts(response.products || [])
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error)
+    }
+  }
+
+  const handleProductSelect = (productId: string) => {
+    setSelectedProduct(productId)
+
+    if (productId === '') {
+      // Limpar formulário se deselecionar
+      setFormData({
+        amount: '',
+        product_name: '',
+        description: '',
+        return_url: '',
+        completion_url: ''
+      })
+      return
+    }
+
+    const product = products.find(p => p.id === productId)
+    if (product) {
+      setFormData({
+        ...formData,
+        product_name: product.name,
+        description: product.description || '',
+        amount: product.amount.toFixed(2).replace('.', ',')
+      })
     }
   }
 
@@ -241,6 +288,31 @@ export default function PaymentLinksPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreate} className="space-y-6">
+              {products.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="select_product" className="text-sm font-semibold text-vibeblack">
+                    <Package className="w-4 h-4 inline mr-1" />
+                    Usar produto existente (opcional)
+                  </Label>
+                  <select
+                    id="select_product"
+                    value={selectedProduct}
+                    onChange={(e) => handleProductSelect(e.target.value)}
+                    className="w-full h-11 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-vibeyellow"
+                  >
+                    <option value="">-- Selecione um produto ou preencha manualmente --</option>
+                    {products.filter(p => p.active).map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name} - R$ {product.amount.toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-vibegray-dark">
+                    Selecione um produto para preencher automaticamente os campos abaixo
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="product_name" className="text-sm font-semibold text-vibeblack">

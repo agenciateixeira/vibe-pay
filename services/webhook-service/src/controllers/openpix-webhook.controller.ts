@@ -159,54 +159,69 @@ async function processPaymentLink(
   transactionId: string,
   value: number
 ): Promise<boolean> {
-  console.log('🔍 Verificando Payment Link...')
+  console.log('🔍 Verificando Payment...')
+  console.log('CorrelationID:', correlationId)
+  console.log('Value recebido (centavos):', value)
 
-  // Buscar payment link
-  const { data: link, error: linkError } = await supabase
-    .from('payment_links')
-    .select('*, users!inner(id)')
+  // Converter centavos para reais
+  const valueInReais = value / 100
+
+  console.log('Value convertido (reais):', valueInReais)
+
+  // Buscar payment
+  const { data: payment, error: paymentError } = await supabase
+    .from('payments')
+    .select('*, users!inner(id, balance, email)')
     .eq('correlation_id', correlationId)
     .eq('status', 'ACTIVE')
     .single()
 
-  if (linkError || !link) {
-    console.log('ℹ️ Payment Link não encontrado ou já processado')
+  if (paymentError || !payment) {
+    console.log('ℹ️ Payment não encontrado ou já processado')
+    console.log('Erro:', paymentError)
     return false
   }
 
-  console.log('✅ Payment Link encontrado:', link.id)
+  console.log('✅ Payment encontrado:', payment.id)
+  console.log('User ID:', payment.user_id)
+  console.log('User email:', payment.users.email)
 
-  // Atualizar status do link
+  // Atualizar status do payment
   const { error: updateError } = await supabase
-    .from('payment_links')
+    .from('payments')
     .update({
-      status: 'PAID',
-      paid_at: new Date().toISOString(),
-      transaction_id: transactionId,
-      paid_value: value
+      status: 'COMPLETED'
     })
-    .eq('id', link.id)
+    .eq('id', payment.id)
 
   if (updateError) {
-    console.error('❌ Erro ao atualizar Payment Link:', updateError)
+    console.error('❌ Erro ao atualizar Payment:', updateError)
     throw updateError
   }
 
-  console.log('✅ Payment Link atualizado para PAID')
+  console.log('✅ Payment atualizado para COMPLETED')
 
   // Atualizar saldo do usuário
-  const currentBalance = parseFloat(link.users.balance?.toString() || '0')
-  const newBalance = currentBalance + value
+  const currentBalance = parseFloat(payment.users.balance?.toString() || '0')
+  const newBalance = currentBalance + valueInReais
+
+  console.log('💰 Atualizando saldo do usuário:')
+  console.log('  Saldo atual:', currentBalance)
+  console.log('  Valor recebido:', valueInReais)
+  console.log('  Novo saldo:', newBalance)
 
   const { error: balanceError } = await supabase
     .from('users')
-    .update({ balance: newBalance })
-    .eq('id', link.user_id)
+    .update({
+      balance: newBalance,
+      total_received: supabase.raw(`total_received + ${valueInReais}`)
+    })
+    .eq('id', payment.user_id)
 
   if (balanceError) {
     console.error('❌ Erro ao atualizar saldo:', balanceError)
   } else {
-    console.log('✅ Saldo atualizado:', currentBalance, '→', newBalance)
+    console.log('✅ Saldo atualizado com sucesso!')
   }
 
   return true

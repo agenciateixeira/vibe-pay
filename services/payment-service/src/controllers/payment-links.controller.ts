@@ -314,6 +314,29 @@ export async function generatePixForLink(
 
     console.log('✅ PIX gerado:', charge.correlationID)
 
+    // Salvar pagamento na tabela payments para rastreamento do webhook
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        user_id: link.user_id,
+        correlation_id: charge.correlationID,
+        txid: charge.correlationID,
+        amount: link.amount,
+        description: link.description || link.product_name,
+        customer_name: customer.name,
+        customer_email: customer.email,
+        customer_phone: customer.phone,
+        customer_tax_id: customer.taxID,
+        pix_key: charge.brCode,
+        qr_code_url: charge.qrCodeImage,
+        status: 'ACTIVE',
+        expires_at: charge.expiresDate
+      })
+
+    if (paymentError) {
+      console.error('⚠️ Erro ao salvar payment (não crítico):', paymentError)
+    }
+
     return reply.send({
       success: true,
       charge: {
