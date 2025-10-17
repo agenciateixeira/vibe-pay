@@ -13,16 +13,28 @@ const server = Fastify({
 })
 
 await server.register(cors, {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://vibep.com.br',
-    'https://www.vibep.com.br',
-    'https://app.vibep.com.br',
-    'https://dashboard.vibep.com.br',
-    'https://dashboard-nine-phi-98.vercel.app',
-    'https://dashboard-69k7w3qll-guilhermes-projects-2870101b.vercel.app',
-  ],
+  origin: (origin, cb) => {
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://vibep.com.br',
+      'https://www.vibep.com.br',
+      'https://app.vibep.com.br',
+      'https://dashboard.vibep.com.br',
+    ]
+
+    // Aceitar todas as URLs do projeto Vercel (qualquer deploy)
+    const vercelPattern = /^https:\/\/dashboard-[a-z0-9-]+-guilhermes-projects-2870101b\.vercel\.app$/
+    const vercelMainPattern = /^https:\/\/dashboard-guilhermes-projects-2870101b\.vercel\.app$/
+
+    if (!origin || allowedOrigins.includes(origin) || vercelPattern.test(origin) || vercelMainPattern.test(origin)) {
+      cb(null, true)
+    } else {
+      console.warn(`⚠️  Origin bloqueada: ${origin}`)
+      cb(new Error('Not allowed by CORS'), false)
+    }
+  },
   credentials: true
 })
 
