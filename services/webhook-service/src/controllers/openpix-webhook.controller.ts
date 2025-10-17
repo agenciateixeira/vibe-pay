@@ -171,7 +171,7 @@ async function processPaymentLink(
   // Buscar payment
   const { data: payment, error: paymentError } = await supabase
     .from('payments')
-    .select('*, users!inner(id, balance, email)')
+    .select('*, users!inner(id, balance, email, total_received)')
     .eq('correlation_id', correlationId)
     .eq('status', 'ACTIVE')
     .single()
@@ -204,17 +204,20 @@ async function processPaymentLink(
   // Atualizar saldo do usuário
   const currentBalance = parseFloat(payment.users.balance?.toString() || '0')
   const newBalance = currentBalance + valueInReais
+  const currentTotalReceived = parseFloat(payment.users.total_received?.toString() || '0')
+  const newTotalReceived = currentTotalReceived + valueInReais
 
   console.log('💰 Atualizando saldo do usuário:')
   console.log('  Saldo atual:', currentBalance)
   console.log('  Valor recebido:', valueInReais)
   console.log('  Novo saldo:', newBalance)
+  console.log('  Total recebido:', currentTotalReceived, '→', newTotalReceived)
 
   const { error: balanceError } = await supabase
     .from('users')
     .update({
       balance: newBalance,
-      total_received: supabase.raw(`total_received + ${valueInReais}`)
+      total_received: newTotalReceived
     })
     .eq('id', payment.user_id)
 

@@ -42,7 +42,7 @@ export async function createWithdrawal(
 
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('id, balance, cpf_cnpj, can_withdraw')
+      .select('id, balance, cpf_cnpj, can_withdraw, total_withdrawn')
       .eq('auth_user_id', user.id)
       .single()
 
@@ -135,11 +135,12 @@ export async function createWithdrawal(
     }
 
     // Deduzir o valor total (valor + taxa) do saldo
+    const currentTotalWithdrawn = parseFloat(userData.total_withdrawn?.toString() || '0')
     const { error: updateError } = await supabase
       .from('users')
       .update({
         balance: currentBalance - totalToDeduct,
-        total_withdrawn: supabase.raw(`total_withdrawn + ${netAmount}`)
+        total_withdrawn: currentTotalWithdrawn + netAmount
       })
       .eq('id', userData.id)
 
