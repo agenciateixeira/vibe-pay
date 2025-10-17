@@ -18,7 +18,20 @@ import {
 
 const server = Fastify({ logger: true })
 
-await server.register(cors, { origin: true })
+await server.register(cors, {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://vibep.com.br',
+    'https://www.vibep.com.br',
+    'https://app.vibep.com.br',
+    'https://dashboard.vibep.com.br',
+    'https://dashboard-nine-phi-98.vercel.app',
+    'https://dashboard-69k7w3qll-guilhermes-projects-2870101b.vercel.app',
+    'https://vibe-payapi-gateway-production.up.railway.app',
+  ],
+  credentials: true
+})
 
 server.get('/health', async () => {
   return { status: 'ok', service: 'vibe-pay-webhook-service' }
