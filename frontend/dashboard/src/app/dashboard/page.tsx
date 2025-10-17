@@ -46,7 +46,7 @@ export default function DashboardPage() {
     try {
       // Buscar payments com tratamento de erro
       let allTransactions: Transaction[] = []
-      
+
       try {
         const response = await api.getPayments()
         allTransactions = response.transactions || response.payments || []
@@ -61,7 +61,7 @@ export default function DashboardPage() {
       setTransactions(validTransactions.slice(0, 10))
 
       // Calcular estatísticas
-      const completed = validTransactions.filter((t: Transaction) => 
+      const completed = validTransactions.filter((t: Transaction) =>
         t.status === 'completed' || t.status === 'COMPLETED'
       )
       const today = new Date().toISOString().split('T')[0]
@@ -74,15 +74,25 @@ export default function DashboardPage() {
         }
       })
 
-      const totalReceived = completed.reduce((sum: number, t: Transaction) => 
+      const totalReceived = completed.reduce((sum: number, t: Transaction) =>
         sum + (Number(t.amount) || 0), 0
       )
+
+      // Buscar saldo real da API (considera saques)
+      let availableBalance = 0
+      try {
+        const balanceResponse = await api.getBalance()
+        availableBalance = balanceResponse.balance || 0
+      } catch (error) {
+        console.log('Erro ao buscar saldo, usando total recebido')
+        availableBalance = totalReceived
+      }
 
       setStats({
         totalReceived,
         totalTransactions: validTransactions.length,
         todayTransactions: todayTxs.length,
-        availableBalance: totalReceived
+        availableBalance
       })
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
