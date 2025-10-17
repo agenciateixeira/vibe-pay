@@ -42,8 +42,7 @@ CREATE INDEX IF NOT EXISTS idx_users_cpf_cnpj ON users(cpf_cnpj);
 ALTER TABLE users DROP CONSTRAINT IF EXISTS check_balance_positive;
 ALTER TABLE users ADD CONSTRAINT check_balance_positive CHECK (balance >= 0);
 
-ALTER TABLE users DROP CONSTRAINT IF EXISTS check_cpf_cnpj_format;
-ALTER TABLE users ADD CONSTRAINT check_cpf_cnpj_format CHECK (cpf_cnpj ~ '^[0-9]{11}$|^[0-9]{14}$');
+-- Nota: Não validamos formato de CPF/CNPJ para permitir diferentes formatos
 
 CREATE OR REPLACE FUNCTION update_users_updated_at()
 RETURNS TRIGGER AS $$
