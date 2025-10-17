@@ -231,6 +231,14 @@ await server.register(proxy, {
   http2: false,
 })
 
+// Transactions Proxy
+await server.register(proxy, {
+  upstream: `http://localhost:${process.env.PAYMENT_SERVICE_PORT || 4002}`,
+  prefix: '/api/transactions',
+  rewritePrefix: '/transactions',
+  http2: false,
+})
+
 // Webhook Management Proxy
 await server.register(proxy, {
   upstream: `http://localhost:${process.env.WEBHOOK_SERVICE_PORT || 4003}`,

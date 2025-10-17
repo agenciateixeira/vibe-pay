@@ -40,6 +40,9 @@ import {
   updateProduct,
   deleteProduct
 } from './controllers/products.controller.js'
+import {
+  getTransactions
+} from './controllers/transactions.controller.js'
 
 const server = Fastify({ logger: true })
 
@@ -85,6 +88,9 @@ server.post('/products/create', createProduct)
 server.get('/products', getProducts)
 server.put('/products/:productId', updateProduct)
 server.delete('/products/:productId', deleteProduct)
+
+// ===== TRANSACTIONS =====
+server.get('/transactions', getTransactions)
 
 const start = async () => {
   try {

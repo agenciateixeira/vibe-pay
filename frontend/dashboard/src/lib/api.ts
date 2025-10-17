@@ -460,6 +460,11 @@ class ApiClient {
       method: 'DELETE',
     })
   }
+
+  // ===== TRANSACTIONS =====
+  async getTransactions() {
+    return this.request<any>('/api/transactions')
+  }
 }
 
 export const api = new ApiClient(API_URL)
