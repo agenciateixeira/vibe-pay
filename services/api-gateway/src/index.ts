@@ -18,8 +18,12 @@ await server.register(cors, {
     'http://localhost:3001',
     'https://app.agenciagtx.com.br',
     'https://vibepay.agenciagtx.com.br',
-    'https://app.vibep.com.br',
     'https://vibep.com.br',
+    'https://www.vibep.com.br',
+    'https://app.vibep.com.br',
+    'https://dashboard.vibep.com.br',
+    'https://dashboard-nine-phi-98.vercel.app',
+    'https://dashboard-i2nz1esvj-guilhermes-projects-2870101b.vercel.app',
   ],
   credentials: true
 })
