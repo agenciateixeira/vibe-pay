@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import CookieConsent from '@/components/CookieConsent'
 import {
   Zap,
   Shield,
@@ -532,6 +533,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Cookie Consent */}
+      <CookieConsent />
     </div>
   )
 }
