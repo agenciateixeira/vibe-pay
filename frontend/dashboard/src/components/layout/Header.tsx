@@ -1,12 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, LogOut, User, ChevronDown } from 'lucide-react'
+import { Bell, LogOut, User, ChevronDown, Menu, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { api } from '@/lib/api'
 
-export function Header() {
+interface HeaderProps {
+  isMobileMenuOpen: boolean
+  setIsMobileMenuOpen: (value: boolean) => void
+}
+
+export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const router = useRouter()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
@@ -44,7 +50,31 @@ export function Header() {
 
   return (
     <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 lg:relative lg:z-auto">
-      <div className="flex-1" />
+      {/* Menu Sanduíche - Mobile Only */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden w-10 h-10 flex items-center justify-center text-vibeblack hover:bg-gray-100 rounded-lg transition-colors"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+
+      {/* Logo Centralizada - Mobile Only */}
+      <Link href="/dashboard" className="lg:hidden absolute left-1/2 -translate-x-1/2">
+        <div className="relative w-20 h-20">
+          <Image
+            src="/logo.png"
+            alt="Vibe Pay"
+            width={80}
+            height={80}
+            className="w-full h-full object-contain"
+            priority
+          />
+        </div>
+      </Link>
+
+      {/* Espaço vazio para desktop */}
+      <div className="hidden lg:block flex-1" />
 
       <div className="flex items-center gap-4">
         <button className="relative p-2 text-gray-600 hover:text-vibeblack hover:bg-gray-100 rounded-lg transition-colors">

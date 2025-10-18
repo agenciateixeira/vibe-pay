@@ -3,14 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { 
-  LayoutDashboard, 
-  Receipt, 
+import {
+  LayoutDashboard,
+  Receipt,
   Key,
   Webhook,
   Settings,
-  Menu,
-  X,
   ChevronRight,
   Link as LinkIcon,
   Repeat,
@@ -19,7 +17,6 @@ import {
   FileText,
   Package
 } from 'lucide-react'
-import { useState } from 'react'
 
 const menuItems = [
   {
@@ -84,9 +81,13 @@ const menuItems = [
   }
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobileMenuOpen: boolean
+  setIsMobileMenuOpen: (value: boolean) => void
+}
+
+export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: SidebarProps) {
   const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -97,30 +98,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Header - Fixed top */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="relative w-12 h-12 flex-shrink-0">
-            <Image
-              src="/logo.png"
-              alt="Vibe Pay"
-              width={48}
-              height={48}
-              className="w-full h-full object-contain"
-              priority
-            />
-          </div>
-        </Link>
-
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="w-10 h-10 flex items-center justify-center text-vibeblack hover:bg-gray-100 rounded-lg transition-colors"
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </header>
-
       {/* Overlay */}
       {isMobileMenuOpen && (
         <div
@@ -151,29 +128,6 @@ export function Sidebar() {
                 priority
               />
             </Link>
-          </div>
-
-          {/* Logo Mobile (dentro do menu lateral) */}
-          <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-100">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <Image
-                  src="/logo.png"
-                  alt="Vibe Pay"
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-contain"
-                  priority
-                />
-              </div>
-            </Link>
-
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-10 h-10 flex items-center justify-center text-vibeblack hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

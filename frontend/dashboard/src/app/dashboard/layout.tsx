@@ -26,6 +26,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const toast = useToast()
 
   useEffect(() => {
@@ -55,9 +56,9 @@ export default function DashboardLayout({
   return (
     <ToastContext.Provider value={toast}>
       <div className="min-h-screen bg-gray-50">
-        <Sidebar />
+        <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="lg:ml-64 pt-16 lg:pt-0">
-          <Header />
+          <Header isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
           <main>
             {children}
           </main>
