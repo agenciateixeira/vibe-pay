@@ -15,6 +15,7 @@ interface HeaderProps {
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const router = useRouter()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
   const [userEmail, setUserEmail] = useState('')
 
@@ -77,11 +78,40 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       <div className="hidden lg:block flex-1" />
 
       <div className="flex items-center gap-4">
-        <button className="relative p-2 text-gray-600 hover:text-vibeblack hover:bg-gray-100 rounded-lg transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-vibeyellow rounded-full" />
-        </button>
+        {/* Sino de Notificações */}
+        <div className="relative">
+          <button
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            className="relative p-2 text-gray-600 hover:text-vibeblack hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-vibeyellow rounded-full" />
+          </button>
 
+          {isNotificationOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsNotificationOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-6 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="text-center">
+                  <div className="mb-4">
+                    <span className="text-4xl">👨‍🍳</span>
+                  </div>
+                  <p className="text-lg font-semibold text-vibeblack mb-2">
+                    Estamos cozinhando...
+                  </p>
+                  <p className="text-sm text-vibegray-dark">
+                    Em breve você terá notificações aqui!
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Dropdown do Usuário */}
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
