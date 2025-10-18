@@ -20,24 +20,32 @@ import {
 } from 'lucide-react'
 
 export default function Home() {
-  const [transactionValue, setTransactionValue] = useState('100')
-  const [transactionCount, setTransactionCount] = useState('100')
+  const [purchaseValue, setPurchaseValue] = useState('100')
 
-  const calculateFees = (value: number, count: number) => {
-    const vibePay = count * 0.95
-    const mercadoPago = count * value * 0.0399 // 3,99%
-    const pagseguro = count * value * 0.0449 // 4,49%
+  const calculateComparison = (value: number) => {
+    // Taxas
+    const vibePayFee = 0.95
+    const mercadoPagoFee = value * 0.0399 // 3,99%
+    const pagseguroFee = value * 0.0449 // 4,49%
+
+    // Quanto você recebe (valor - taxa)
+    const vibePayReceives = value - vibePayFee
+    const mercadoPagoReceives = value - mercadoPagoFee
+    const pagseguroReceives = value - pagseguroFee
 
     return {
-      vibePay,
-      mercadoPago,
-      pagseguro,
-      economyVsMercadoPago: mercadoPago - vibePay,
-      economyVsPagSeguro: pagseguro - vibePay
+      vibePayFee,
+      mercadoPagoFee,
+      pagseguroFee,
+      vibePayReceives,
+      mercadoPagoReceives,
+      pagseguroReceives,
+      economyVsMercadoPago: mercadoPagoFee - vibePayFee,
+      economyVsPagSeguro: pagseguroFee - vibePayFee
     }
   }
 
-  const fees = calculateFees(parseFloat(transactionValue) || 0, parseInt(transactionCount) || 0)
+  const comparison = calculateComparison(parseFloat(purchaseValue) || 100)
 
   return (
     <div className="min-h-screen bg-white">
@@ -353,80 +361,107 @@ export default function Home() {
                 <span className="text-sm font-semibold text-vibeblack">Calculadora de Economia</span>
               </div>
               <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-vibeblack mb-4 sm:mb-6">
-                Economize até <span className="text-vibeyellow">90%</span> em taxas
+                Veja quanto você <span className="text-vibeyellow">recebe de verdade</span>
               </h2>
               <p className="text-lg sm:text-xl text-vibegray-dark">
-                Compare quanto você pagaria com cada plataforma
+                Simule uma venda e compare o valor final que entra na sua conta
               </p>
             </div>
 
             <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div>
-                  <label className="block text-sm font-semibold text-vibeblack mb-2">
-                    Valor médio por transação (R$)
-                  </label>
-                  <Input
-                    type="number"
-                    value={transactionValue}
-                    onChange={(e) => setTransactionValue(e.target.value)}
-                    className="h-12 text-lg"
-                    min="1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-vibeblack mb-2">
-                    Número de transações por mês
-                  </label>
-                  <Input
-                    type="number"
-                    value={transactionCount}
-                    onChange={(e) => setTransactionCount(e.target.value)}
-                    className="h-12 text-lg"
-                    min="1"
-                  />
+              <div className="mb-8">
+                <label className="block text-center text-lg font-bold text-vibeblack mb-4">
+                  Valor da Venda
+                </label>
+                <div className="max-w-md mx-auto">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-vibegray">R$</span>
+                    <Input
+                      type="number"
+                      value={purchaseValue}
+                      onChange={(e) => setPurchaseValue(e.target.value)}
+                      className="h-16 text-3xl font-bold text-center pl-16"
+                      min="1"
+                      step="0.01"
+                    />
+                  </div>
+                  <p className="text-sm text-vibegray-dark text-center mt-2">Digite qualquer valor para simular</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-vibeyellow to-vibeyellow-dark rounded-2xl p-6 text-center relative overflow-hidden">
-                  <div className="absolute top-0 right-0 bg-vibeblack text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    MELHOR
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Vibe Pay */}
+                <div className="bg-gradient-to-br from-vibeyellow to-vibeyellow-dark rounded-3xl p-6 relative overflow-hidden border-4 border-vibeyellow">
+                  <div className="absolute top-3 right-3 bg-vibeblack text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                    VOCÊ GANHA MAIS
                   </div>
-                  <h3 className="font-bold text-vibeblack text-lg mb-2">Vibe Pay</h3>
-                  <div className="text-4xl font-black text-vibeblack mb-1">
-                    R$ {fees.vibePay.toFixed(2)}
-                  </div>
-                  <p className="text-sm text-vibeblack/80">R$ 0,95 por transação</p>
-                </div>
-
-                <div className="bg-gray-100 rounded-2xl p-6 text-center">
-                  <h3 className="font-bold text-vibegray-dark text-lg mb-2">Mercado Pago</h3>
-                  <div className="text-4xl font-black text-vibegray-dark mb-1">
-                    R$ {fees.mercadoPago.toFixed(2)}
-                  </div>
-                  <p className="text-sm text-vibegray">3,99% por transação</p>
-                  <div className="mt-3 text-sm text-red-600 font-semibold">
-                    +R$ {fees.economyVsMercadoPago.toFixed(2)}/mês
+                  <div className="text-center mb-6">
+                    <h3 className="font-black text-vibeblack text-xl mb-2">Vibe Pay</h3>
+                    <div className="bg-vibeblack/10 rounded-xl p-3 mb-3">
+                      <p className="text-xs text-vibeblack/70 uppercase font-semibold mb-1">Você Recebe</p>
+                      <div className="text-4xl sm:text-5xl font-black text-vibeblack">
+                        R$ {comparison.vibePayReceives.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-white/30 rounded-lg p-2">
+                      <p className="text-xs text-vibeblack/70 font-semibold">Taxa cobrada</p>
+                      <p className="text-lg font-bold text-vibeblack">R$ 0,95</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-gray-100 rounded-2xl p-6 text-center">
-                  <h3 className="font-bold text-vibegray-dark text-lg mb-2">PagSeguro</h3>
-                  <div className="text-4xl font-black text-vibegray-dark mb-1">
-                    R$ {fees.pagseguro.toFixed(2)}
+                {/* Mercado Pago */}
+                <div className="bg-gray-100 rounded-3xl p-6 relative border-2 border-gray-200">
+                  <div className="text-center mb-6">
+                    <h3 className="font-bold text-vibegray-dark text-xl mb-2">Mercado Pago</h3>
+                    <div className="bg-white rounded-xl p-3 mb-3">
+                      <p className="text-xs text-vibegray uppercase font-semibold mb-1">Você Recebe</p>
+                      <div className="text-4xl sm:text-5xl font-black text-vibegray-dark">
+                        R$ {comparison.mercadoPagoReceives.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+                      <p className="text-xs text-red-700 font-semibold">Taxa cobrada</p>
+                      <p className="text-lg font-bold text-red-600">R$ {comparison.mercadoPagoFee.toFixed(2)}</p>
+                      <p className="text-xs text-red-600 mt-1">3,99% da venda</p>
+                    </div>
+                    <div className="mt-3 text-red-600 font-bold text-sm">
+                      Você perde R$ {comparison.economyVsMercadoPago.toFixed(2)}
+                    </div>
                   </div>
-                  <p className="text-sm text-vibegray">4,49% por transação</p>
-                  <div className="mt-3 text-sm text-red-600 font-semibold">
-                    +R$ {fees.economyVsPagSeguro.toFixed(2)}/mês
+                </div>
+
+                {/* PagSeguro */}
+                <div className="bg-gray-100 rounded-3xl p-6 relative border-2 border-gray-200">
+                  <div className="text-center mb-6">
+                    <h3 className="font-bold text-vibegray-dark text-xl mb-2">PagSeguro</h3>
+                    <div className="bg-white rounded-xl p-3 mb-3">
+                      <p className="text-xs text-vibegray uppercase font-semibold mb-1">Você Recebe</p>
+                      <div className="text-4xl sm:text-5xl font-black text-vibegray-dark">
+                        R$ {comparison.pagseguroReceives.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+                      <p className="text-xs text-red-700 font-semibold">Taxa cobrada</p>
+                      <p className="text-lg font-bold text-red-600">R$ {comparison.pagseguroFee.toFixed(2)}</p>
+                      <p className="text-xs text-red-600 mt-1">4,49% da venda</p>
+                    </div>
+                    <div className="mt-3 text-red-600 font-bold text-sm">
+                      Você perde R$ {comparison.economyVsPagSeguro.toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-center gap-2 text-green-600 font-semibold text-lg">
-                  <Check className="w-6 h-6" />
-                  <span>Você economiza até R$ {Math.max(fees.economyVsMercadoPago, fees.economyVsPagSeguro).toFixed(2)} por mês com Vibe Pay!</span>
+              <div className="mt-8 pt-6 border-t-2 border-gray-200">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-2 text-green-600 font-black text-xl sm:text-2xl">
+                    <Check className="w-8 h-8" />
+                    <span>Economia de R$ {Math.max(comparison.economyVsMercadoPago, comparison.economyVsPagSeguro).toFixed(2)} por venda!</span>
+                  </div>
+                  <p className="text-vibegray-dark text-center">
+                    Com a Vibe Pay, você paga apenas <strong className="text-vibeyellow">R$ 0,95</strong> por transação, independente do valor da venda.
+                  </p>
                 </div>
               </div>
             </div>
