@@ -98,14 +98,14 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Header - Fixed top */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="relative w-21 h-12 flex-shrink-0">
-            <Image 
-              src="/logo.png" 
-              alt="Vibe Pay" 
-              width={64} 
-              height={40}
+          <div className="relative w-12 h-12 flex-shrink-0">
+            <Image
+              src="/logo.png"
+              alt="Vibe Pay"
+              width={48}
+              height={48}
               className="w-full h-full object-contain"
               priority
             />
@@ -117,7 +117,7 @@ export function Sidebar() {
           className="w-10 h-10 flex items-center justify-center text-vibeblack hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Toggle menu"
         >
-          <Menu className="w-6 h-6" />
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </header>
 
@@ -139,32 +139,34 @@ export function Sidebar() {
         `}
       >
         <div className="flex flex-col h-full">
+          {/* Logo Desktop */}
           <div className="hidden lg:flex items-center justify-center p-6 border-b border-gray-100">
-            <div className="relative w-26 h-12 flex-shrink-0">
-              <Image 
-                src="/logo.png" 
-                alt="Vibe Pay" 
-                width={96} 
-                height={64}
+            <Link href="/dashboard" className="relative w-20 h-20 flex-shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Vibe Pay"
+                width={80}
+                height={80}
                 className="w-full h-full object-contain"
                 priority
               />
-            </div>
+            </Link>
           </div>
 
+          {/* Logo Mobile (dentro do menu lateral) */}
           <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="relative w-16 h-10 flex-shrink-0">
-                <Image 
-                  src="/logo.png" 
-                  alt="Vibe Pay" 
-                  width={64} 
-                  height={40}
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="Vibe Pay"
+                  width={48}
+                  height={48}
                   className="w-full h-full object-contain"
                   priority
                 />
               </div>
-            </div>
+            </Link>
 
             <button
               onClick={() => setIsMobileMenuOpen(false)}

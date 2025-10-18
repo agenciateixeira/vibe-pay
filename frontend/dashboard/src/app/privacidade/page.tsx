@@ -1,27 +1,28 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Shield, Lock, Eye, FileText, UserCheck, Globe, Calendar } from 'lucide-react'
 
 export default function PrivacidadePage() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-vibeyellow/5">
+      <header className="border-b border-gray-200/50 bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-12 h-12">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-14 h-14 transition-transform group-hover:scale-105">
                 <Image
                   src="/logo.png"
                   alt="Vibe Pay"
-                  width={48}
-                  height={48}
+                  width={56}
+                  height={56}
                   className="w-full h-full object-contain"
                 />
               </div>
+              <span className="hidden sm:block text-xl font-bold text-vibeblack">Vibe Pay</span>
             </Link>
             <Link href="/">
-              <Button variant="ghost" className="gap-2">
+              <Button variant="outline" className="gap-2 border-vibeyellow/30 hover:bg-vibeyellow/10 hover:border-vibeyellow">
                 <ArrowLeft className="w-4 h-4" />
                 Voltar
               </Button>
@@ -30,24 +31,63 @@ export default function PrivacidadePage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="prose prose-lg max-w-none">
-          <h1 className="text-4xl font-black text-vibeblack mb-6">Política de Privacidade</h1>
-
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <p className="text-sm text-vibegray-dark mb-2">
-              <strong>Razão Social:</strong> Vibe Pay Tecnologia LTDA
-            </p>
-            <p className="text-sm text-vibegray-dark mb-2">
-              <strong>CNPJ:</strong> 41.768.146/0001-69
-            </p>
-            <p className="text-sm text-vibegray-dark mb-2">
-              <strong>Contato DPO:</strong> juridico@vibep.com.br
-            </p>
-            <p className="text-sm text-vibegray-dark">
-              <strong>Última atualização:</strong> Janeiro de 2025
-            </p>
+      <main className="container mx-auto px-4 py-12 max-w-5xl">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-vibeyellow to-vibeyellow/70 rounded-3xl mb-6 shadow-lg shadow-vibeyellow/30">
+            <Shield className="w-10 h-10 text-vibeblack" />
           </div>
+          <h1 className="text-5xl font-black text-vibeblack mb-4 bg-gradient-to-r from-vibeblack to-vibeblack/70 bg-clip-text">
+            Política de Privacidade
+          </h1>
+          <p className="text-lg text-vibegray-dark max-w-2xl mx-auto">
+            Transparência e segurança no tratamento dos seus dados pessoais
+          </p>
+        </div>
+
+        {/* Company Info Card */}
+        <div className="bg-gradient-to-br from-vibeyellow/10 via-vibeyellow/5 to-transparent border-2 border-vibeyellow/20 rounded-2xl p-8 mb-12 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-vibeyellow/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FileText className="w-5 h-5 text-vibeblack" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-vibegray-dark uppercase tracking-wide mb-1">Razão Social</p>
+                <p className="text-base font-bold text-vibeblack">Vibe Pay Tecnologia LTDA</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-vibeyellow/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FileText className="w-5 h-5 text-vibeblack" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-vibegray-dark uppercase tracking-wide mb-1">CNPJ</p>
+                <p className="text-base font-bold text-vibeblack">41.768.146/0001-69</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-vibeyellow/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <UserCheck className="w-5 h-5 text-vibeblack" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-vibegray-dark uppercase tracking-wide mb-1">Contato DPO</p>
+                <p className="text-base font-bold text-vibeblack">juridico@vibep.com.br</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-vibeyellow/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-vibeblack" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-vibegray-dark uppercase tracking-wide mb-1">Última atualização</p>
+                <p className="text-base font-bold text-vibeblack">Janeiro de 2025</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="prose prose-lg max-w-none">
 
           <h2 className="text-2xl font-bold text-vibeblack mt-8 mb-4">1. Introdução</h2>
           <p className="text-vibegray-dark mb-4">
@@ -231,11 +271,38 @@ export default function PrivacidadePage() {
         </div>
       </main>
 
-      <footer className="border-t border-gray-200 py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-vibegray-dark">
-            © 2025 Vibe Pay - Todos os direitos reservados
-          </p>
+      <footer className="border-t border-gray-200/50 bg-white/50 backdrop-blur-sm py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative w-16 h-16">
+              <Image
+                src="/logo.png"
+                alt="Vibe Pay"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-vibeblack mb-2">
+                Vibe Pay Tecnologia LTDA
+              </p>
+              <p className="text-xs text-vibegray-dark mb-1">
+                CNPJ: 41.768.146/0001-69
+              </p>
+              <p className="text-xs text-vibegray-dark">
+                © 2025 Vibe Pay - Todos os direitos reservados
+              </p>
+            </div>
+            <div className="flex gap-6 text-sm">
+              <Link href="/termos" className="text-vibegray-dark hover:text-vibeyellow transition-colors font-medium">
+                Termos de Uso
+              </Link>
+              <Link href="/privacidade" className="text-vibegray-dark hover:text-vibeyellow transition-colors font-medium">
+                Privacidade
+              </Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

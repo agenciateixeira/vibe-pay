@@ -56,7 +56,7 @@ export default function DashboardLayout({
     <ToastContext.Provider value={toast}>
       <div className="min-h-screen bg-gray-50">
         <Sidebar />
-        <div className="lg:ml-64 pt-14 lg:pt-0">
+        <div className="lg:ml-64 pt-16 lg:pt-0">
           <Header />
           <main>
             {children}
