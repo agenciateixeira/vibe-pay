@@ -50,7 +50,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   }
 
   return (
-    <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 lg:relative lg:z-auto">
+    <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-4 lg:px-8 fixed top-0 left-0 right-0 z-50 lg:relative lg:z-auto lg:left-auto lg:right-auto">
       {/* Menu Sanduíche - Mobile Only */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
