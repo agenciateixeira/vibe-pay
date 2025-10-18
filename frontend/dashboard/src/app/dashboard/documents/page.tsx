@@ -205,23 +205,39 @@ export default function DocumentsPage() {
             </div>
           </div>
         ) : (
-          <Label
-            htmlFor={`upload-${type}`}
-            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-vibeyellow transition-colors"
-          >
-            <div className="flex flex-col items-center">
-              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">Clique para enviar</p>
-            </div>
-            <input
-              id={`upload-${type}`}
-              type="file"
-              className="hidden"
-              accept="image/jpeg,image/png,image/jpg,application/pdf"
-              onChange={(e) => handleFileUpload(type, e)}
-              disabled={uploading}
-            />
-          </Label>
+          <div>
+            <Label
+              htmlFor={`upload-${type}`}
+              className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-all ${
+                uploading
+                  ? 'border-vibeyellow bg-yellow-50 cursor-not-allowed'
+                  : 'border-gray-300 hover:border-vibeyellow hover:bg-gray-50 cursor-pointer'
+              }`}
+            >
+              <div className="flex flex-col items-center">
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-8 h-8 text-vibeyellow mb-2 animate-spin" />
+                    <p className="text-sm text-vibeyellow font-semibold">Enviando...</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 font-medium">Clique para enviar</p>
+                    <p className="text-xs text-gray-500 mt-1">JPG, PNG ou PDF (máx 10MB)</p>
+                  </>
+                )}
+              </div>
+              <input
+                id={`upload-${type}`}
+                type="file"
+                className="hidden"
+                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                onChange={(e) => handleFileUpload(type, e)}
+                disabled={uploading}
+              />
+            </Label>
+          </div>
         )}
       </div>
     )
